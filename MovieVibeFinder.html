@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Movie Vibe Finder — Alyssa Freyman</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F5F0E8;
+    --dark: #1A1A1A;
+    --mid: #4A4A4A;
+    --muted: #8A8A8A;
+    --accent: #C2553A;
+    --accent-light: #F0DDD8;
+    --border: #D8D0C4;
+    --white: #FFFFFF;
+    --card-bg: #FDFAF6;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--dark);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  header {
+    padding: 2rem 2.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  header a {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.03em;
+  }
+
+  header a:hover { color: var(--accent); }
+
+  .wordmark {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--dark);
+    letter-spacing: -0.01em;
+  }
+
+  .hero {
+    padding: 4rem 2.5rem 3rem;
+    max-width: 640px;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    line-height: 1.1;
+    color: var(--dark);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero p {
+    font-size: 16px;
+    color: var(--mid);
+    line-height: 1.7;
+    max-width: 480px;
+  }
+
+  .app-container {
+    padding: 0 2.5rem 4rem;
+    max-width: 720px;
+  }
+
+  .step { display: none; }
+  .step.active { display: block; }
+
+  .step-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .step-num {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .step-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    color: var(--dark);
+    letter-spacing: -0.01em;
+  }
+
+  .field-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 1.5rem 0 0.75rem;
+  }
+
+  .grid-wrap {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+    margin-bottom: 0.5rem;
+  }
+
+  .pill-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 0.5rem;
+  }
+
+  .tog {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--white);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--mid);
+    text-align: center;
+    transition: all 0.15s;
+    line-height: 1.3;
+  }
+
+  .tog:hover { border-color: var(--accent); color: var(--accent); }
+
+  .tog.on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--white);
+  }
+
+  .pill {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: var(--white);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--mid);
+    transition: all 0.15s;
+  }
+
+  .pill:hover { border-color: var(--accent); color: var(--accent); }
+  .pill.on { background: var(--accent); border-color: var(--accent); color: var(--white); }
+
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--white);
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--dark);
+    outline: none;
+    transition: border-color 0.15s;
+    margin-bottom: 0.5rem;
+  }
+
+  input[type="text"]:focus, textarea:focus { border-color: var(--accent); }
+  textarea { min-height: 80px; resize: vertical; }
+
+  .nav-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 2rem;
+    align-items: center;
+  }
+
+  .btn-primary {
+    padding: 12px 24px;
+    background: var(--accent);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-ghost {
+    padding: 12px 20px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .btn-ghost:hover { color: var(--dark); border-color: var(--dark); }
+
+  .progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 2.5rem;
+  }
+
+  .prog-dot {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border);
+    flex: 1;
+    transition: background 0.3s;
+  }
+
+  .prog-dot.done { background: var(--accent); }
+
+  .loading-wrap {
+    padding: 3rem 0;
+    text-align: center;
+  }
+
+  .loading-wrap p {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: var(--dark);
+    font-style: italic;
+    margin-bottom: 1rem;
+  }
+
+  .loading-wrap span {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .results-header {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .movie-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 14px;
+    transition: border-color 0.15s;
+  }
+
+  .movie-card:hover { border-color: var(--accent); }
+
+  .movie-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem;
+    color: var(--dark);
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+
+  .movie-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .vibe-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    background: var(--accent-light);
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .movie-reason {
+    font-size: 14px;
+    color: var(--mid);
+    line-height: 1.65;
+  }
+
+  .error-msg {
+    padding: 1rem 1.25rem;
+    background: #FDF0ED;
+    border: 1px solid #F0C4BB;
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  footer {
+    padding: 2rem 2.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+
+  @media (max-width: 600px) {
+    header, .hero, .app-container { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .hero { padding-top: 2.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="wordmark">Alyssa Freyman</span>
+  <a href="index.html">← Back to portfolio</a>
+</header>
+
+<div class="hero">
+  <p class="hero-label">Portfolio Project</p>
+  <h1>Stop scrolling.<br>Find your <em>movie.</em></h1>
+  <p>Tell me what streaming services you have, pick some genres, and describe the vibe — I'll use AI to find exactly what you're in the mood for.</p>
+</div>
+
+<div class="app-container">
+
+  <div class="progress">
+    <div class="prog-dot" id="pd0"></div>
+    <div class="prog-dot" id="pd1"></div>
+    <div class="prog-dot" id="pd2"></div>
+    <div class="prog-dot" id="pd3"></div>
+  </div>
+
+  <div class="step active" id="step0">
+    <div class="step-header">
+      <p class="step-num">Step 1 of 3</p>
+      <h2 class="step-title">What are you working with?</h2>
+    </div>
+
+    <p class="field-label">Streaming services you have</p>
+    <div class="grid-wrap" id="svc"></div>
+
+    <p class="field-label">Genres you're open to</p>
+    <div class="pill-wrap" id="gen"></div>
+
+    <div class="nav-row">
+      <button class="btn-primary" onclick="showStep(1)">Next →</button>
+    </div>
+  </div>
+
+  <div class="step" id="step1">
+    <div class="step-header">
+      <p class="step-num">Step 2 of 3</p>
+      <h2 class="step-title">Describe the vibe.</h2>
+    </div>
+
+    <p class="field-label">Name a movie that captures the feeling you want</p>
+    <input type="text" id="vibe" placeholder="e.g. The Princess Bride, Knives Out, Spirited Away...">
+
+    <p class="field-label">Anything else to help narrow it down? (optional)</p>
+    <textarea id="extra" placeholder="e.g. cozy for a rainy night, nothing too violent, I want to cry a little, something funny..."></textarea>
+
+    <div class="nav-row">
+      <button class="btn-ghost" onclick="showStep(0)">← Back</button>
+      <button class="btn-primary" onclick="showStep(2)">Next →</button>
+    </div>
+  </div>
+
+  <div class="step" id="step2">
+    <div class="step-header">
+      <p class="step-num">Step 3 of 3</p>
+      <h2 class="step-title">Almost there.</h2>
+    </div>
+
+    <p class="field-label">How long do you want to watch?</p>
+    <div class="pill-wrap" id="len"></div>
+
+    <p class="field-label">Era preference</p>
+    <div class="pill-wrap" id="era"></div>
+
+    <p class="field-label">Watching with?</p>
+    <div class="pill-wrap" id="aud"></div>
+
+    <div class="nav-row">
+      <button class="btn-ghost" onclick="showStep(1)">← Back</button>
+      <button class="btn-primary" onclick="getRecs()">Find my movies ↗</button>
+    </div>
+  </div>
+
+  <div class="step" id="step3">
+    <div id="results"></div>
+    <div class="nav-row" style="margin-top:2rem">
+      <button class="btn-ghost" onclick="showStep(0)">← Start over</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span>Built by Alyssa Freyman · Powered by Claude AI</span>
+  <a href="index.html">Portfolio</a>
+</footer>
+
+<script>
+var picks = { svc: [], gen: [], len: 'any length', era: 'any era', aud: 'unspecified' };
+
+function makeToggle(txt, containerId, multi) {
+  var b = document.createElement('button');
+  b.textContent = txt;
+  b.className = multi ? 'tog' : 'pill';
+  b.setAttribute('data-on', '0');
+  b.addEventListener('click', function () {
+    if (multi) {
+      var on = b.getAttribute('data-on') === '1';
+      b.setAttribute('data-on', on ? '0' : '1');
+      b.classList.toggle('on', !on);
+      if (on) { picks[containerId] = picks[containerId].filter(function (v) { return v !== txt; }); }
+      else { picks[containerId].push(txt); }
+    } else {
+      document.getElementById(containerId).querySelectorAll('button').forEach(function (x) {
+        x.setAttribute('data-on', '0');
+        x.classList.remove('on');
+      });
+      b.setAttribute('data-on', '1');
+      b.classList.add('on');
+      picks[containerId] = txt;
+    }
+  });
+  return b;
+}
+
+function populate(id, items, multi) {
+  var el = document.getElementById(id);
+  items.forEach(function (t) { el.appendChild(makeToggle(t, id, multi)); });
+}
+
+populate('svc', ['Netflix', 'Disney+', 'HBO Max', 'Hulu', 'Apple TV+', 'Prime Video', 'Peacock', 'Paramount+', 'Willing to rent'], true);
+populate('gen', ['Action', 'Comedy', 'Drama', 'Horror', 'Romance', 'Sci-Fi', 'Fantasy', 'Thriller', 'Animation', 'Documentary', 'Mystery', 'Adventure'], true);
+populate('len', ['Under 90 min', '90–120 min', 'Over 2 hours', 'Any length'], false);
+populate('era', ['Classic (pre-1990)', '90s & 2000s', 'Recent (2010s–now)', 'Any era'], false);
+populate('aud', ['Just me', 'Partner / friend', 'Family with kids', 'Group'], false);
+
+function showStep(n) {
+  ['step0', 'step1', 'step2', 'step3'].forEach(function (id, i) {
+    document.getElementById(id).classList.toggle('active', i === n);
+  });
+  for (var i = 0; i < 4; i++) {
+    document.getElementById('pd' + i).classList.toggle('done', i < n);
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function getRecs() {
+  showStep(3);
+  var vibe = document.getElementById('vibe').value.trim();
+  var extra = document.getElementById('extra').value.trim();
+  var results = document.getElementById('results');
+
+  results.innerHTML = '<div class="loading-wrap"><p>Finding your perfect movies...</p><span>Matching vibes, checking platforms</span></div>';
+
+  var prompt = 'You are a movie recommendation expert with deep knowledge of film. Recommend exactly 4 movies based on these preferences:\n\nStreaming services available: ' + (picks.svc.length ? picks.svc.join(', ') : 'any / willing to rent') + '\nGenres: ' + (picks.gen.length ? picks.gen.join(', ') : 'no preference') + '\nVibe reference movie: ' + (vibe || 'none given') + '\nExtra context: ' + (extra || 'none') + '\nPreferred length: ' + picks.len + '\nEra preference: ' + picks.era + '\nWatching with: ' + picks.aud + '\n\nPrioritize movies available on their listed streaming services. If a vibe reference is given, find movies with genuinely similar emotional texture, tone, or storytelling style.\n\nReturn ONLY a raw JSON array of exactly 4 objects with no markdown fencing or extra text:\n[{"title":"","year":0,"genre":"","platform":"","reason":"","vibe_match":""}]\n\nFields: title (string), year (number), genre (2-3 word description), platform (specific streaming service or "Available to rent"), reason (2 engaging sentences explaining why this matches), vibe_match (short evocative phrase like "same witty banter energy" or "cozy mystery with heart")';
+
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1200,
+        messages: [
+          { role: 'user', content: prompt },
+          { role: 'assistant', content: '[' }
+        ]
+      })
+    });
+
+    if (!res.ok) {
+      var errText = await res.text();
+      throw new Error('API returned ' + res.status + ': ' + errText);
+    }
+
+    var data = await res.json();
+    var raw = '[' + data.content.map(function (b) { return b.text || ''; }).join('');
+    var movies = JSON.parse(raw);
+
+    results.innerHTML = '<h2 class="results-header">Your picks</h2>' +
+      movies.map(function (m) {
+        return '<div class="movie-card">' +
+          '<p class="movie-title">' + m.title + ' <span style="font-family:\'DM Sans\',sans-serif;font-size:14px;font-weight:300;color:var(--muted)">(' + m.year + ')</span></p>' +
+          '<p class="movie-meta">' + m.genre + ' &nbsp;·&nbsp; ' + m.platform + '</p>' +
+          (m.vibe_match ? '<span class="vibe-badge">' + m.vibe_match + '</span>' : '') +
+          '<p class="movie-reason">' + m.reason + '</p>' +
+          '</div>';
+      }).join('');
+
+  } catch (e) {
+    results.innerHTML = '<div class="error-msg"><strong>Something went wrong.</strong><br>' + e.message + '<br><br>Make sure you\'re running this from a web server (not opening the file directly) and that your API key is configured.</div>';
+  }
+}
+</script>
+</body>
+</html>
