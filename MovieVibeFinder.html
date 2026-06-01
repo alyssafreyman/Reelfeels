@@ -365,6 +365,14 @@
   <p>Tell me what streaming services you have, pick some genres, and describe the vibe — I'll use AI to find exactly what you're in the mood for.</p>
 </div>
 
+<div style="padding:1rem 2.5rem;background:#FDF8F2;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <p style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Google Gemini API Key</p>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <input type="password" id="apikey" placeholder="Paste your AIza... key here" style="flex:1;min-width:260px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--white);font-size:13px;font-family:'DM Sans',sans-serif;color:var(--dark);outline:none">
+    <p style="font-size:12px;color:var(--muted);line-height:1.5">Free key at <a href="https://aistudio.google.com" target="_blank" style="color:var(--accent);text-decoration:none">aistudio.google.com</a>. Stays in your browser, never stored.</p>
+  </div>
+</div>
+
 <div class="app-container">
 
   <div class="progress">
@@ -494,6 +502,11 @@ function showStep(n) {
 }
 
 async function getRecs() {
+  var apiKey = document.getElementById('apikey').value.trim();
+  if (!apiKey) {
+    alert('Please paste your Google Gemini API key (starting with AIza) in the field at the top of the page.');
+    return;
+  }
   showStep(3);
   var vibe = document.getElementById('vibe').value.trim();
   var extra = document.getElementById('extra').value.trim();
@@ -501,19 +514,15 @@ async function getRecs() {
 
   results.innerHTML = '<div class="loading-wrap"><p>Finding your perfect movies...</p><span>Matching vibes, checking platforms</span></div>';
 
-  var prompt = 'You are a movie recommendation expert with deep knowledge of film. Recommend exactly 4 movies based on these preferences:\n\nStreaming services available: ' + (picks.svc.length ? picks.svc.join(', ') : 'any / willing to rent') + '\nGenres: ' + (picks.gen.length ? picks.gen.join(', ') : 'no preference') + '\nVibe reference movie: ' + (vibe || 'none given') + '\nExtra context: ' + (extra || 'none') + '\nPreferred length: ' + picks.len + '\nEra preference: ' + picks.era + '\nWatching with: ' + picks.aud + '\n\nPrioritize movies available on their listed streaming services. If a vibe reference is given, find movies with genuinely similar emotional texture, tone, or storytelling style.\n\nReturn ONLY a raw JSON array of exactly 4 objects with no markdown fencing or extra text:\n[{"title":"","year":0,"genre":"","platform":"","reason":"","vibe_match":""}]\n\nFields: title (string), year (number), genre (2-3 word description), platform (specific streaming service or "Available to rent"), reason (2 engaging sentences explaining why this matches), vibe_match (short evocative phrase like "same witty banter energy" or "cozy mystery with heart")';
+  var prompt = 'You are a movie recommendation expert with deep knowledge of film. Recommend exactly 4 movies based on these preferences:\n\nStreaming services available: ' + (picks.svc.length ? picks.svc.join(', ') : 'any / willing to rent') + '\nGenres: ' + (picks.gen.length ? picks.gen.join(', ') : 'no preference') + '\nVibe reference movie: ' + (vibe || 'none given') + '\nExtra context: ' + (extra || 'none') + '\nPreferred length: ' + picks.len + '\nEra preference: ' + picks.era + '\nWatching with: ' + picks.aud + '\n\nPrioritize movies available on their listed streaming services. If a vibe reference is given, find movies with genuinely similar emotional texture, tone, or storytelling style.\n\nReturn ONLY a raw JSON array of exactly 4 objects with no markdown fencing, no backticks, no extra text — just the array:\n[{"title":"","year":0,"genre":"","platform":"","reason":"","vibe_match":""}]\n\nFields: title (string), year (number), genre (2-3 word description), platform (specific streaming service or "Available to rent"), reason (2 engaging sentences explaining why this matches), vibe_match (short evocative phrase like "same witty banter energy" or "cozy mystery with heart")';
 
   try {
-    var res = await fetch('https://api.anthropic.com/v1/messages', {
+    var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1200,
-        messages: [
-          { role: 'user', content: prompt },
-          { role: 'assistant', content: '[' }
-        ]
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
       })
     });
 
@@ -523,7 +532,8 @@ async function getRecs() {
     }
 
     var data = await res.json();
-    var raw = '[' + data.content.map(function (b) { return b.text || ''; }).join('');
+    var raw = data.candidates[0].content.parts[0].text.trim();
+    raw = raw.replace(/```json|```/g, '').trim();
     var movies = JSON.parse(raw);
 
     results.innerHTML = '<h2 class="results-header">Your picks</h2>' +
@@ -537,7 +547,7 @@ async function getRecs() {
       }).join('');
 
   } catch (e) {
-    results.innerHTML = '<div class="error-msg"><strong>Something went wrong.</strong><br>' + e.message + '<br><br>Make sure you\'re running this from a web server (not opening the file directly) and that your API key is configured.</div>';
+    results.innerHTML = '<div class="error-msg"><strong>Something went wrong.</strong><br>' + e.message + '<br><br>Check that your Gemini API key is correct and try again.</div>';
   }
 }
 </script>
