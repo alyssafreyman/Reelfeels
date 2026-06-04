@@ -517,12 +517,12 @@ async function getRecs() {
   var prompt = 'You are a movie recommendation expert with deep knowledge of film. Recommend exactly 4 movies based on these preferences:\n\nStreaming services available: ' + (picks.svc.length ? picks.svc.join(', ') : 'any / willing to rent') + '\nGenres: ' + (picks.gen.length ? picks.gen.join(', ') : 'no preference') + '\nVibe reference movie: ' + (vibe || 'none given') + '\nExtra context: ' + (extra || 'none') + '\nPreferred length: ' + picks.len + '\nEra preference: ' + picks.era + '\nWatching with: ' + picks.aud + '\n\nPrioritize movies available on their listed streaming services. If a vibe reference is given, find movies with genuinely similar emotional texture, tone, or storytelling style.\n\nReturn ONLY a raw JSON array of exactly 4 objects with no markdown fencing, no backticks, no extra text — just the array:\n[{"title":"","year":0,"genre":"","platform":"","reason":"","vibe_match":""}]\n\nFields: title (string), year (number), genre (2-3 word description), platform (specific streaming service or "Available to rent"), reason (2 engaging sentences explaining why this matches), vibe_match (short evocative phrase like "same witty banter energy" or "cozy mystery with heart")';
 
   try {
-    var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey, {
+    var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 1200 }
+        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
       })
     });
 
